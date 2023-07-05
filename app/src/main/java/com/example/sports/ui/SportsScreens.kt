@@ -42,7 +42,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -319,26 +318,62 @@ private fun SportsDetail(
     }
 }
 
-@Preview()
 @Composable
-fun SportsListItemPreview() {
-    SportsTheme {
-        SportsListItem(
-            sport = LocalSportsDataProvider.defaultSport,
-            onItemClick = {}
+fun SportsListAndDetails(
+    sports: List<Sport>,
+    onClick: (Sport) -> Unit,
+    selectedSport: Sport,
+    onBackPressed: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BackHandler {
+        onBackPressed
+    }
+    Row(modifier = modifier) {
+        SportsList(
+            sports = sports,
+            onClick = onClick,
+            modifier = Modifier.weight(1.5f)
+        )
+        SportsDetail(selectedSport = selectedSport,
+            onBackPressed = onBackPressed,
+            modifier = Modifier.weight(2f)
         )
     }
 }
 
-@Preview()
+//@Preview()
+//@Composable
+//fun SportsListItemPreview() {
+//    SportsTheme {
+//        SportsListItem(
+//            sport = LocalSportsDataProvider.defaultSport,
+//            onItemClick = {}
+//        )
+//    }
+//}
+//
+//@Preview()
+//@Composable
+//fun SportsListPreview() {
+//    SportsTheme() {
+//        Surface {
+//            SportsList(
+//                sports = LocalSportsDataProvider.getSportsData(),
+//                onClick = {}
+//            )
+//        }
+//    }
+//}
+
+@Preview(showBackground = true, widthDp = 1080)
 @Composable
-fun SportsListPreview() {
-    SportsTheme() {
-        Surface {
-            SportsList(
-                sports = LocalSportsDataProvider.getSportsData(),
-                onClick = {}
-            )
-        }
+fun SportsListAndDetailsPreview() {
+    SportsTheme {
+        SportsListAndDetails(
+            sports = LocalSportsDataProvider.getSportsData(),
+            onClick = {},
+            selectedSport = LocalSportsDataProvider.defaultSport,
+            onBackPressed = {})
     }
 }
