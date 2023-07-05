@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,6 +46,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,6 +67,7 @@ import com.example.sports.R
 import com.example.sports.data.LocalSportsDataProvider
 import com.example.sports.model.Sport
 import com.example.sports.ui.theme.SportsTheme
+import kotlin.system.exitProcess
 
 /**
  * Main composable that serves as container
@@ -73,6 +76,8 @@ import com.example.sports.ui.theme.SportsTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SportsApp(
+    windowSize: WindowWidthSizeClass,
+    isLandscape: Boolean,
 ) {
     val viewModel: SportsViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -82,18 +87,31 @@ fun SportsApp(
             SportsAppBar(
                 isShowingListPage = uiState.isShowingListPage,
                 onBackButtonClick = { viewModel.navigateToListPage() },
+                modifier = if (windowSize != WindowWidthSizeClass.Expanded && isLandscape) {
+                     Modifier.fillMaxHeight(0.1f)
+                } else {Modifier}
             )
         }
     ) { innerPadding ->
         if (uiState.isShowingListPage) {
-            SportsList(
-                sports = uiState.sportsList,
-                onClick = {
-                    viewModel.updateCurrentSport(it)
-                    viewModel.navigateToDetailPage()
-                },
-                modifier = Modifier.padding((innerPadding))
-            )
+            if (windowSize == WindowWidthSizeClass.Expanded || isLandscape) {
+                SportsListAndDetails(
+                    sports = uiState.sportsList,
+                    onClick = {viewModel.updateCurrentSport(it)},
+                    selectedSport = uiState.currentSport,
+                    onBackPressed = { exitProcess(0) },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            } else {
+                SportsList(
+                    sports = uiState.sportsList,
+                    onClick = {
+                        viewModel.updateCurrentSport(it)
+                        viewModel.navigateToDetailPage()
+                    },
+                    modifier = Modifier.padding((innerPadding))
+                )
+            }
         } else {
             SportsDetail(
                 selectedSport = uiState.currentSport,
@@ -326,9 +344,7 @@ fun SportsListAndDetails(
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BackHandler {
-        onBackPressed
-    }
+    BackHandler (true, onBackPressed)
     Row(modifier = modifier) {
         SportsList(
             sports = sports,
